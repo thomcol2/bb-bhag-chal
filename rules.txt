@@ -1,0 +1,33 @@
+RULES:
+ - Tigers start in the four corners
+ - Goats start with none on the board
+ - Goats have the first turn
+ - Turns alternate between players
+ - Moves must be to free squares along lines as follows:
+    A1 - B1 - C1 - D1 - E1
+    |  \ |  / |  \ |  / |  
+    A2 - B2 - C2 - D2 - E2
+    |  / |  \ |  / |  \ |  
+    A3 - B3 - C3 - D3 - E3
+    |  \ |  / |  \ |  / |  
+    A4 - B4 - C4 - D4 - E4
+    |  / |  \ |  / |  \ |  
+    A5 - B5 - C5 - D5 - E5
+ - Goats win if tigers have no moves
+ - Tigers win if 5 goats have been captured
+
+MOVE NOTATION:
+- G A4  : goat player places a goat on A4
+- G A4A3: tiger player moves from A4 to A3
+- T A1A2: tiger player moves from A1 to A2
+- TxA1A3: tiger player moves from A1 to A3 by capturing goat on A2
+
+GOAT RULES:
+ - Cannot move until all goats are placed
+ - Must leave the board when captured
+ - Cannot jump over tigers or other goats
+
+TIGER RULES:
+ - Can capture goats on any move
+ - Can only capture one goat a time
+ - Cannot jump over another tiger
