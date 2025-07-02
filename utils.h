@@ -90,12 +90,16 @@ void print_move(MOVE move) {
 
     if (move_type == GOAT_PLACE) {
         print_coord((move >> 2) & 31);
-        printf("\n");
     } else {
         print_coord((move >> 2) & 31);
         print_coord((move >> 7) & 31);
-        printf("\n");
     }
+}
+
+void print_state(STATE state) {
+    printf("Turn %u, ", state & 1);
+    printf("Captured %u, ", (state >> 1) & 7);
+    printf("Placed, %u\n", (state >> 4) & 31);
 }
 
 u8 string_to_index(const char coord[3]) {
@@ -109,36 +113,44 @@ u8 string_to_index(const char coord[3]) {
 
 void gen_movelookup(void) {
     s8 row, column;
-    BOARD board;
+    BOARD move_mask;
 
     for (u8 i = 0; i < 25; i++) {
-        board = 0;
+        move_mask = 0;
         row = i / 5;
         column = i % 5;
 
         // calculate adjacent orthogonal positions
         if ( (column+1) <= 4)
-            board |= 1 << ((row * 5) + (column+1));
+            move_mask |= 1 << ((row * 5) + (column+1));
         if ( (column-1) >= 0)
-            board |= 1 << ((row * 5) + (column-1));
+            move_mask |= 1 << ((row * 5) + (column-1));
         if ( (row+1) <= 4)
-            board |= 1 << (((row+1) * 5) + column);
+            move_mask |= 1 << (((row+1) * 5) + column);
         if ( (row-1) >= 0)
-            board |= 1 << (((row-1) * 5) + column);
+            move_mask |= 1 << (((row-1) * 5) + column);
 
         // only calculate diagonals if the index is even
         if ( (i % 2) == 0) {
             if ( (column+1) <= 4 && (row+1) <= 4)
-                board |= 1 << (((row+1) * 5) + (column+1));
+                move_mask |= 1 << (((row+1) * 5) + (column+1));
             if ( (column+1) <= 4 && (row-1) >= 0)
-                board |= 1 << (((row-1) * 5) + (column+1));
+                move_mask |= 1 << (((row-1) * 5) + (column+1));
             if ( (column-1) >= 0 && (row+1) <= 4)
-                board |= 1 << (((row+1) * 5) + (column-1));
+                move_mask |= 1 << (((row+1) * 5) + (column-1));
             if ( (column-1) >= 0 && (row-1) >= 0)
-                board |= 1 << (((row-1) * 5) + (column-1));
+                move_mask |= 1 << (((row-1) * 5) + (column-1));
         }
 
-        printf("%u,\n", board);
+        printf("%u,\n", move_mask);
+        print_board(move_mask);
     }
 }
+
+void gen_coordinatelookup(void) {
+    for (u8 i = 0; i < 25; i++) { 
+        printf("%u\n", 1 << i);
+    }
+}
+
 #endif

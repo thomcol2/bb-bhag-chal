@@ -18,16 +18,17 @@ RULES:
 
 MOVE NOTATION:
 - G A4  : goat player places a goat on A4
-- G A4A3: tiger player moves from A4 to A3
+- G A4A3: goat player moves from A4 to A3
 - T A1A2: tiger player moves from A1 to A2
 - TxA1A3: tiger player moves from A1 to A3 by capturing goat on A2
 
 GOAT RULES:
- - Cannot move until all goats are placed
+ - Cannot move until 20 goats have been placed 
  - Must leave the board when captured
  - Cannot jump over tigers or other goats
 
 TIGER RULES:
  - Can capture goats on any move
- - Can only capture one goat a time
+ - Capturing is not obligatory
+ - Can only capture one goat per turn 
  - Cannot jump over another tiger

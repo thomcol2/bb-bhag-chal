@@ -22,16 +22,37 @@ enum game_states {
 };
 
 enum analysis_modes {
-    NODES = 0,
-    NODES_TIMED = 1,
+    NODES,
+    TIMED,
+    NODES_TIMED,
 };
 
-enum coordinates_to_indices {
-    A1, B1, C1, D1, E1,
-    A2, B2, C2, D2, E2,
-    A3, B3, C3, D3, E3,
-    A4, B4, C4, D4, E4,
-    A5, B5, C5, D5, E5,
+enum coordinates_to_boards {
+    A1 = 1,
+    B1 = 2,
+    C1 = 4,
+    D1 = 8,
+    E1 = 16,
+    A2 = 32,
+    B2 = 64,
+    C2 = 128,
+    D2 = 256,
+    E2 = 512,
+    A3 = 1024,
+    B3 = 2048,
+    C3 = 4096,
+    D3 = 8192,
+    E3 = 16384,
+    A4 = 32768,
+    B4 = 65536,
+    C4 = 131072,
+    D4 = 262144,
+    E4 = 524288,
+    A5 = 1048576,
+    B5 = 2097152,
+    C5 = 4194304,
+    D5 = 8388608,
+    E5 = 16777216,
 };
 
 const BOARD movelookup[25] = {
