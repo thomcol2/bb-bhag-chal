@@ -4,22 +4,18 @@
 #include "constants.h"
 #include "utils.h"
 
-
-// functions that generate moves for specific cases
 u8 gen_goatplaces(BOARD goats, BOARD tigers, MOVE (*moves)[32]) {
     BOARD unoccupied = ~(goats | tigers);
-    MOVE temp_move;
     u8 num_moves = 0;
+    u8 i;
+    
+    for (i = __builtin_ffs(unoccupied); i && i <= 25; i = __builtin_ffs(unoccupied)) {
+        i--;
 
-    for (u8 i = 0; i < 25; i++) {
-        // for every unoccupied position
-        if ((unoccupied >> i) & 1) {
-            // record move
-            temp_move = GOAT_PLACE;
-            temp_move |= i << 2;
-            (*moves)[num_moves] = temp_move;
-            num_moves++;
-        }
+        (*moves)[num_moves] = GOAT_PLACE | (i<<2);
+        num_moves++;
+        
+        unoccupied ^= 1 << i;
     }
 
     return num_moves;
@@ -27,27 +23,26 @@ u8 gen_goatplaces(BOARD goats, BOARD tigers, MOVE (*moves)[32]) {
 
 u8 gen_goatmoves(BOARD goats, BOARD tigers, MOVE (*moves)[32]) {
     BOARD unoccupied = ~(goats | tigers);
-    BOARD legal_move_mask;
-    MOVE temp_move;
+    BOARD legal_moves;
     u8 num_moves = 0;
+    u8 i, u;
 
-    for (u8 i = 0; i < 25; i++) {
-        // for every goat in goats
-        if ((goats >> i) & 1) {
-            // check possible moves
-            legal_move_mask = movelookup[i] & unoccupied;
-            for (u8 u = 0; u < 25; u++) {
-                // for every move
-                if ((legal_move_mask >> u) & 1) {
-                    // record move
-                    temp_move = GOAT_MOVE;
-                    temp_move |= i << 2; // target
-                    temp_move |= u << 7; // destination
-                    (*moves)[num_moves] = temp_move;
-                    num_moves++;
-                }
-            }
+    for (i = __builtin_ffs(unoccupied); i && i <= 25; i = __builtin_ffs(unoccupied)) {
+        i--;
+
+        // for every legal move
+        legal_moves = movelookup[i] & unoccupied;
+        for (u = __builtin_ffs(legal_moves); u && u <= 25; u = __builtin_ffs(legal_moves)) {
+            u--;
+
+            // record move
+            (*moves)[num_moves] = GOAT_MOVE | (i<<2) | (u<<7);
+            num_moves++;
+
+            legal_moves ^= 1 << u;
         }
+
+        unoccupied ^= 1 << i;
     }
 
     return num_moves;
@@ -55,71 +50,61 @@ u8 gen_goatmoves(BOARD goats, BOARD tigers, MOVE (*moves)[32]) {
 
 u8 gen_tigermoves(BOARD goats, BOARD tigers, MOVE (*moves)[32]) {
     BOARD unoccupied = ~(goats | tigers);
-    BOARD legal_move_mask, adjacent_goats;
-    MOVE temp_move;
+    BOARD legal_moves, adjacent_goats;
     u8 num_moves = 0;
-    s8 opposite_idx;
+    u8 i, u;
+    s8 dest_idx;
 
-    for (u8 i = 0; i < 25; i++) {
-        // for every tiger in tigers
-        if ((tigers >> i) & 1) {
-            // check possible moves
-            legal_move_mask = movelookup[i] & unoccupied;
-            for (u8 u = 0; u < 25; u++) {
-                // for every move
-                if ((legal_move_mask >> u) & 1) {
-                    // record move
-                    temp_move = TIGER_MOVE;
-                    temp_move |= i << 2; // target
-                    temp_move |= u << 7; // destination
-                    (*moves)[num_moves] = temp_move;
-                    num_moves++;
-                }
-            }
+    for (i = __builtin_ffs(tigers); i && i <= 25; i = __builtin_ffs(tigers)) {
+        i--;
 
-            // check adjacent goats
-            adjacent_goats = movelookup[i] & goats;
-            if (adjacent_goats) {
-                for (u8 u = 0; u < 25; u++) {
-                    // for every goat in adjacent goats
-                    if ((adjacent_goats >> u ) & 1) {
-                        // calculate capture destination 
-                        opposite_idx = (2 * u) - i;
+        // for every legal move
+        legal_moves = movelookup[i] & unoccupied;
+        for (u = __builtin_ffs(legal_moves); u && u <= 25; u = __builtin_ffs(legal_moves)) {
+            u--;
 
-                        // check if capture destination is inbounds and unoccupied
-                        if (opposite_idx >= 0 && 
-                            opposite_idx <= 24 && 
-                            (unoccupied & (1 << opposite_idx))) {
-                            // record move
-                            temp_move = TIGER_CAPTURE;
-                            temp_move |= i << 2; // target
-                            temp_move |= opposite_idx << 7; // destination
-                            (*moves)[num_moves] = temp_move;
-                            num_moves++;
-                        }
-                    }
-                }
-            }
+            // record move
+            (*moves)[num_moves] = TIGER_MOVE | (i<<2) | (u<<7);
+            num_moves++;
+
+            legal_moves ^= 1 << u;
         }
+
+        // for every adjacent goat
+        adjacent_goats = movelookup[i] & goats;
+        for (u = __builtin_ffs(adjacent_goats); u && u <= 25; u = __builtin_ffs(adjacent_goats)) {
+            u--;
+
+            // calculate capture destination 
+            dest_idx = (2 * u) - i;
+
+            // validate capture
+            if (dest_idx >= 0 && dest_idx <= 24 && (unoccupied & (1 << dest_idx))) {
+                // record capture
+                (*moves)[num_moves] = TIGER_CAPTURE | (i<<2) | (dest_idx<<7);
+                num_moves++;
+            }
+
+           adjacent_goats ^= 1 << u;
+        }
+       
+        tigers ^= 1 << i;
     }
 
     return num_moves;
 }
 
 u8 gen_moves(BOARD goats, BOARD tigers, STATE state, MOVE (*moves)[32]) {
-    u8 turn = state & 1;
-    u8 goats_captured = (state >> 1) & 7;
-    u8 goats_placed = (state >> 4) & 31;
-
-    if (goats_captured == 5)
+    if (((state >> 1) & 7) == 5)
         return 0;
 
-    if (turn == TIGER_TURN)
+    if ((state & 1) == TIGER_TURN) {
         return gen_tigermoves(goats, tigers, moves);
-    if (goats_placed < 20) 
+    } else if (((state >> 4) & 31) < 20) {
         return gen_goatplaces(goats, tigers, moves);
-
-    return gen_goatmoves(goats, tigers, moves);
+    } else {
+        return gen_goatmoves(goats, tigers, moves);
+    }
 }
 
 void make_move(BOARD *goats, BOARD *tigers, STATE *state, MOVE move) {
@@ -234,7 +219,7 @@ void analyze_performance(u8 start, u8 depth, u8 mode, u8 reps) {
             }
             break;
         case TIMED:
-            for (u8 i = 1; i <= depth; i++) {
+            for (u8 i = start; i <= depth; i++) {
                 for (u8 u = 0; u < reps; u++) {
                     begin = clock();
                     perft(goats, tigers, state, i);
@@ -313,11 +298,14 @@ void play_cli(void) {
 
 int main() {
     // TODO
-    //  - optimize performance of functions 
+    //  - optimize performance 
     //  - develop ai
 
+    // analyze_performance(1, 7, TIMED, 20);
+    // analyze_performance(8, 8, TIMED, 5);
+    // analyze_performance(9, 9, TIMED, 1);
+
     play_cli();
-    // analyze_performance(1, 7, NODES_TIMED, 1);
 
     return 0;
 }
