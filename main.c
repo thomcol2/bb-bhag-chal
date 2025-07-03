@@ -4,14 +4,12 @@
 #include "constants.h"
 #include "utils.h"
 
-u8 gen_goatplaces(BOARD goats, BOARD tigers, MOVE (*moves)[32]) {
+u8 gen_goatplaces(BOARD goats, BOARD tigers, MOVE (*moves)[25]) {
     BOARD unoccupied = ~(goats | tigers);
     u8 num_moves = 0;
     u8 i;
     
-    for (i = __builtin_ffs(unoccupied); i && i <= 25; i = __builtin_ffs(unoccupied)) {
-        i--;
-
+    for (i = __builtin_ctz(unoccupied); i < 25; i = __builtin_ctz(unoccupied)) {
         (*moves)[num_moves] = GOAT_PLACE | (i<<2);
         num_moves++;
         
@@ -21,20 +19,16 @@ u8 gen_goatplaces(BOARD goats, BOARD tigers, MOVE (*moves)[32]) {
     return num_moves;
 }
 
-u8 gen_goatmoves(BOARD goats, BOARD tigers, MOVE (*moves)[32]) {
+u8 gen_goatmoves(BOARD goats, BOARD tigers, MOVE (*moves)[25]) {
     BOARD unoccupied = ~(goats | tigers);
     BOARD legal_moves;
     u8 num_moves = 0;
     u8 i, u;
 
-    for (i = __builtin_ffs(unoccupied); i && i <= 25; i = __builtin_ffs(unoccupied)) {
-        i--;
-
+    for (i = __builtin_ctz(unoccupied); i < 25; i = __builtin_ctz(unoccupied)) {
         // for every legal move
         legal_moves = movelookup[i] & unoccupied;
-        for (u = __builtin_ffs(legal_moves); u && u <= 25; u = __builtin_ffs(legal_moves)) {
-            u--;
-
+        for (u = __builtin_ctz(legal_moves); u < 25; u = __builtin_ctz(legal_moves)) {
             // record move
             (*moves)[num_moves] = GOAT_MOVE | (i<<2) | (u<<7);
             num_moves++;
@@ -48,21 +42,17 @@ u8 gen_goatmoves(BOARD goats, BOARD tigers, MOVE (*moves)[32]) {
     return num_moves;
 }
 
-u8 gen_tigermoves(BOARD goats, BOARD tigers, MOVE (*moves)[32]) {
+u8 gen_tigermoves(BOARD goats, BOARD tigers, MOVE (*moves)[25]) {
     BOARD unoccupied = ~(goats | tigers);
     BOARD legal_moves, adjacent_goats;
     u8 num_moves = 0;
     u8 i, u;
     s8 dest_idx;
 
-    for (i = __builtin_ffs(tigers); i && i <= 25; i = __builtin_ffs(tigers)) {
-        i--;
-
+    for (i = __builtin_ctz(tigers); i < 25; i = __builtin_ctz(tigers)) {
         // for every legal move
         legal_moves = movelookup[i] & unoccupied;
-        for (u = __builtin_ffs(legal_moves); u && u <= 25; u = __builtin_ffs(legal_moves)) {
-            u--;
-
+        for (u = __builtin_ctz(legal_moves); u < 25; u = __builtin_ctz(legal_moves)) {
             // record move
             (*moves)[num_moves] = TIGER_MOVE | (i<<2) | (u<<7);
             num_moves++;
@@ -72,9 +62,7 @@ u8 gen_tigermoves(BOARD goats, BOARD tigers, MOVE (*moves)[32]) {
 
         // for every adjacent goat
         adjacent_goats = movelookup[i] & goats;
-        for (u = __builtin_ffs(adjacent_goats); u && u <= 25; u = __builtin_ffs(adjacent_goats)) {
-            u--;
-
+        for (u = __builtin_ctz(adjacent_goats); u < 25; u = __builtin_ctz(adjacent_goats)) {
             // calculate capture destination 
             dest_idx = (2 * u) - i;
 
@@ -94,7 +82,8 @@ u8 gen_tigermoves(BOARD goats, BOARD tigers, MOVE (*moves)[32]) {
     return num_moves;
 }
 
-u8 gen_moves(BOARD goats, BOARD tigers, STATE state, MOVE (*moves)[32]) {
+u8 gen_moves(BOARD goats, BOARD tigers, STATE state, MOVE (*moves)[25]) {
+    // if 5 goats captured
     if (((state >> 1) & 7) == 5)
         return 0;
 
@@ -178,7 +167,7 @@ void undo_move(BOARD *goats, BOARD *tigers, STATE *state, MOVE move) {
 u64 perft(BOARD goats, BOARD tigers, STATE state, u8 depth) {
     // TODO:
     //  - Add trackers for number of goats captured/games ended
-    MOVE moves[32];
+    MOVE moves[25];
     u64 nodes = 0;
     u8 num_moves = gen_moves(goats, tigers, state, &moves);
 
@@ -198,7 +187,7 @@ void analyze_performance(u8 start, u8 depth, u8 mode, u8 reps) {
     BOARD goats = GOAT_START; 
     BOARD tigers = TIGER_START;
     STATE state = STATE_START;
-    MOVE moves[32];
+    MOVE moves[25];
 
     clock_t begin, end;
     double t_sum = 0.0;
@@ -248,7 +237,7 @@ void play_cli(void) {
     BOARD goats = GOAT_START;
     BOARD tigers = TIGER_START;
     STATE state = STATE_START;
-    MOVE moves[32];
+    MOVE moves[25];
     u8 input, num_moves;
 
     while (1) {
@@ -284,11 +273,13 @@ void play_cli(void) {
         // apply move
         make_move(&goats, &tigers, &state, moves[input]);
 
-        // check if game ends
+        // end game if 5 goats captured 
         if (((state >> 1) & 7) == 5) {
             printf("Tigers win!\n");
             break;
         }
+
+        // end game if tigers have no moves
         if ((state & 1) && num_moves == 0) {
             printf("Goats win!\n");
             break;
@@ -301,11 +292,11 @@ int main() {
     //  - optimize performance 
     //  - develop ai
 
-    // analyze_performance(1, 7, TIMED, 20);
-    // analyze_performance(8, 8, TIMED, 5);
-    // analyze_performance(9, 9, TIMED, 1);
+    analyze_performance(1, 7, TIMED, 20);
+    analyze_performance(8, 8, TIMED, 5);
+    analyze_performance(9, 9, TIMED, 1);
 
-    play_cli();
+    // play_cli();
 
     return 0;
 }
