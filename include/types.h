@@ -1,5 +1,5 @@
-#ifndef _TYPES_H_
-#define _TYPES_H_
+#ifndef TYPES_H
+#define TYPES_H
 
 // 25 bits for each position on the board
 typedef unsigned int BOARD; 

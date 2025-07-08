@@ -1,11 +1,13 @@
-SRC = main.c
-LIBS = 
+CFLAGS = ${INCLUDES} -Wall -g 
+INCLUDES = -I./include
+LIBS =  
+SRC = $(wildcard src/*.c)
 OUT = main
 
 all: build run
 build:
-	gcc -o ${OUT} ${SRC} ${LIBS} -g
-release:
-	gcc -O3 -o ${OUT} ${SRC} ${LIBS} -g
+	gcc ${CFLAGS} -o ${OUT} ${SRC} ${LIBS} 
 run:
 	./${OUT}
+clean:
+	rm -f ${OUT}

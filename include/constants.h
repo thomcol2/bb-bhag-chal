@@ -1,5 +1,5 @@
-#ifndef _CONSTS_H_
-#define _CONSTS_H_
+#ifndef CONSTS_H
+#define CONSTS_H
 
 #include "types.h"
 
@@ -8,20 +8,20 @@ enum board_states {
     TIGER_START = 17825809,
 };
 
-enum move_types {
-    GOAT_MOVE = 0,
-    TIGER_MOVE = 1,
-    GOAT_PLACE = 2,
-    TIGER_CAPTURE = 3,
-};
-
 enum game_states {
     GOAT_TURN = 0,
     TIGER_TURN = 1,
     STATE_START = 0,
 };
 
-enum analysis_modes {
+enum move_types {
+    GOAT_MOVE,
+    TIGER_MOVE,
+    GOAT_PLACE,
+    TIGER_CAPTURE,
+};
+
+enum performance_modes {
     NODES,
     TIMED,
     NODES_TIMED,
@@ -55,7 +55,7 @@ enum coordinates_to_boards {
     E5 = 16777216,
 };
 
-const BOARD movelookup[25] = {
+static const BOARD movelookup[25] = {
     98,
     69,
     458,
@@ -81,5 +81,33 @@ const BOARD movelookup[25] = {
     10944512,
     21233664,
     9175040,
+};
+
+static const BOARD capturelookup[25] = {
+    5124,
+    2147485704,
+    21521,
+    8194,
+    20484,
+    134250624,
+    67436800,
+    131616,
+    327744,
+    524416,
+    5246981,
+    2105346,
+    22037525,
+    8390664,
+    20975636,
+    33685536,
+    335806784,
+    134774912,
+    335610176,
+    537002496,
+    4199424,
+    8390656,
+    17847296,
+    2105344,
+    4214784,
 };
 #endif
