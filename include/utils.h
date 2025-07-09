@@ -4,29 +4,32 @@
 #include <stdio.h>
 #include <time.h>
 
+#include "engine.h"
 #include "moves.h"
 #include "types.h"
 
+enum perf_mode {
+    NODES,
+    TIMED,
+    NODES_TIMED,
+};
+
 // print functions
-void print_board(BOARD board);
-void print_game(BOARD goats, BOARD tigers);
-void print_indices(void);
-void print_coord(u8 index);
-void print_move(MOVE move);
-void print_state(STATE state);
+void print_board(Board board);
+void print_game(Board goats, Board tigers);
+void print_coord(unsigned char index);
+void print_move(Move move);
+void print_state(State state);
 
 //
 void play_cli(void);
 
 // performance test functions
-u64 perft(BOARD goats, BOARD tigers, STATE state, u8 depth);
-void analyze_performance(u8 start, u8 depth, u8 mode, u8 reps);
+unsigned long perft(Board goats, Board tigers, State state, unsigned char depth);
+void analyze_perft(unsigned char start, unsigned char depth, unsigned char mode, unsigned char reps);
 
 // lookup generation functions
 void gen_movelookup(void);
 void gen_capturelookup(void);
 void gen_coordinatelookup(void);
-
-// conversion functions
-u8 string_to_index(const char coord[3]);
 #endif

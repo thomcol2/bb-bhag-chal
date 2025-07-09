@@ -16,7 +16,7 @@ RULES:
  - Goats win if tigers have no moves
  - Tigers win if 5 goats have been captured
 
-MOVE NOTATION:
+Move NOTATION:
 - G A4  : goat player places a goat on A4
 - G A4A3: goat player moves from A4 to A3
 - T A1A2: tiger player moves from A1 to A2

@@ -1,4 +1,4 @@
-CFLAGS = ${INCLUDES} -Wall -g 
+CFLAGS = ${INCLUDES} -std=c99 -Wall -g 
 INCLUDES = -I./include
 LIBS =  
 SRC = $(wildcard src/*.c)

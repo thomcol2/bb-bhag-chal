@@ -4,12 +4,12 @@
 #include "constants.h"
 #include "types.h"
 
-u8 gen_goatplaces(BOARD goats, BOARD tigers, MOVE (*moves)[25]);
-u8 gen_goatmoves(BOARD goats, BOARD tigers, MOVE (*moves)[25]);
-u8 gen_tigermoves(BOARD goats, BOARD tigers, MOVE (*moves)[25]);
+unsigned char gen_goatplaces(Board goats, Board tigers, Move (*moves)[25]);
+unsigned char gen_goatmoves(Board goats, Board tigers, Move (*moves)[25]);
+unsigned char gen_tigermoves(Board goats, Board tigers, Move (*moves)[25]);
 
-u8 gen_moves(BOARD goats, BOARD tigers, STATE state, MOVE (*moves)[25]);
+unsigned char gen_moves(Board goats, Board tigers, State state, Move (*moves)[25]);
 
-void make_move(BOARD *goats, BOARD *tigers, STATE *state, MOVE move);
-void undo_move(BOARD *goats, BOARD *tigers, STATE *state, MOVE move);
+void make_move(Board *goats, Board *tigers, State *state, Move move);
+void undo_move(Board *goats, Board *tigers, State *state, Move move);
 #endif
